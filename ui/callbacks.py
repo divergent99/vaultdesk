@@ -353,8 +353,8 @@ def register_callbacks(app):
             const hour = new Date().getHours();
             if (hour < 12) return 'Good Morning';
             if (hour < 15) return 'Good Afternoon';
-            if (hour < 19) return 'Good Evening';
-            return 'Good Night';
+            if (hour < 24) return 'Good Evening';
+            return 'Night Owl 🦉';
         }
         """,
         Output("greeting-text", "children"),
