@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+auth0-fastapi>=1.0.0b5
+google-api-python-client
+google-auth
+httpx
+nest_asyncio
+starlette
+dash
+dash-bootstrap-components
+langchain
+langchain-aws
+langgraph
+boto3
+flask
+requests
