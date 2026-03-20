@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 
 from dash import html
 
@@ -277,21 +277,21 @@ def action_chip(label: str, prompt: str):
 
 
 def welcome_card(name: str = ""):
-    IST = timezone(timedelta(hours=5, minutes=30))
-    hour = datetime.now(IST).hour
-    greeting = "Good Morning" if hour < 12 else "Good Afternoon" if hour < 15 else "Good Evening"
     first = name.split()[0] if name else "there"
     return html.Div(
         style={"display": "flex", "flexDirection": "column", "alignItems": "center",
                "justifyContent": "center", "flex": "1", "padding": "40px 20px",
                "textAlign": "center"},
         children=[
-            html.Div(f"{greeting}, {first}.", style={
+            html.Div(style={
                 "fontFamily": "Plus Jakarta Sans, sans-serif", "fontWeight": "800",
                 "color": "#ffffff",
                 "fontSize": "clamp(1.8rem, 3.5vw, 2.6rem)",
                 "marginBottom": "10px", "letterSpacing": "-1px", "lineHeight": "1.15",
-            }),
+            }, children=[
+                html.Span(id="greeting-text", children="Hello"),
+                html.Span(f", {first}."),
+            ]),
             html.Div("What would you like to do in your deal room today?", style={
                 "color": "#4a6080", "fontSize": "1rem", "marginBottom": "48px",
             }),

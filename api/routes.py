@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -9,10 +10,11 @@ from config.settings import PORT
 
 router = APIRouter()
 
+BASE_URL = os.environ.get("APP_BASE_URL", f"http://localhost:{PORT}")
+
 
 @router.get("/")
 async def root(request: Request):
-    # auth_client is attached to app.state by build_auth0()
     auth_client = request.app.state.auth_client
     try:
         from starlette.responses import Response
@@ -56,7 +58,7 @@ async def api_chat(request: Request):
 
 @router.get("/api/logout")
 async def api_logout():
-    return RedirectResponse(url=f"http://localhost:{PORT}/auth/logout")
+    return RedirectResponse(url=f"{BASE_URL}/auth/logout")
 
 
 @router.post("/api/clear")

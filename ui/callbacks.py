@@ -345,3 +345,18 @@ def register_callbacks(app):
         messages.append({"role": "assistant", "content": reply})
         bubbles = [msg_bubble_from_store(m) for m in messages]
         return bubbles, messages, None, True, "●", "Ready"
+
+    # ── Browser-side greeting (uses local time, not server time) ─────
+    app.clientside_callback(
+        """
+        function(data) {
+            const hour = new Date().getHours();
+            if (hour < 12) return 'Good Morning';
+            if (hour < 15) return 'Good Afternoon';
+            if (hour < 19) return 'Good Evening';
+            return 'Good Night';
+        }
+        """,
+        Output("greeting-text", "children"),
+        Input("user-store", "data"),
+    )
