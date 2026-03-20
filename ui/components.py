@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from dash import html
 
@@ -277,7 +277,8 @@ def action_chip(label: str, prompt: str):
 
 
 def welcome_card(name: str = ""):
-    hour = datetime.now().hour
+    IST = timezone(timedelta(hours=5, minutes=30))
+    hour = datetime.now(IST).hour
     greeting = "Good Morning" if hour < 12 else "Good Afternoon" if hour < 15 else "Good Evening"
     first = name.split()[0] if name else "there"
     return html.Div(
