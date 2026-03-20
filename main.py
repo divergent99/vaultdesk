@@ -1,6 +1,3 @@
-import nest_asyncio
-nest_asyncio.apply()
-
 import asyncio
 import uvicorn
 
@@ -39,4 +36,3 @@ async def start():
 
 if __name__ == "__main__":
     asyncio.run(start())
-
