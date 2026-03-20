@@ -29,7 +29,7 @@ print("=" * 60 + "\n")
 
 async def start():
     app = build()
-    cfg = uvicorn.Config(app, host="127.0.0.1", port=PORT, log_level="warning")
+    cfg = uvicorn.Config(app, host="0.0.0.0", port=PORT, log_level="warning")
     server = uvicorn.Server(cfg)
     await server.serve()
 
