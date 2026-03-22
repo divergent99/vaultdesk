@@ -69,3 +69,49 @@ async def api_clear(request: Request):
         raise HTTPException(status_code=401)
     clear_conversation(user["sub"])
     return JSONResponse({"status": "cleared"})
+
+
+@router.post("/api/send-email")
+async def api_send_email(request: Request):
+    token = request.headers.get("X-Session-Token", "")
+    user = get_user_from_token(token)
+    if not user:
+        raise HTTPException(status_code=401)
+    body = await request.json()
+    to      = body.get("to", "").strip()
+    subject = body.get("subject", "").strip()
+    content = body.get("body", "").strip()
+    if not to or not subject or not content:
+        return JSONResponse({"error": "Missing fields"}, status_code=400)
+    try:
+        from agent.runner import run_agent
+        reply = await asyncio.get_event_loop().run_in_executor(
+            None, run_agent, user["sub"],
+            f"send an email to {to} with subject: {subject} and body: {content}"
+        )
+        return JSONResponse({"reply": reply})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@router.post("/api/draft-email")
+async def api_draft_email(request: Request):
+    token = request.headers.get("X-Session-Token", "")
+    user = get_user_from_token(token)
+    if not user:
+        raise HTTPException(status_code=401)
+    body = await request.json()
+    to      = body.get("to", "").strip()
+    subject = body.get("subject", "").strip()
+    content = body.get("body", "").strip()
+    if not to or not subject or not content:
+        return JSONResponse({"error": "Missing fields"}, status_code=400)
+    try:
+        from agent.runner import run_agent
+        reply = await asyncio.get_event_loop().run_in_executor(
+            None, run_agent, user["sub"],
+            f"draft an email to {to} with subject: {subject} and body: {content}"
+        )
+        return JSONResponse({"reply": reply})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)

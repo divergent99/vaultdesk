@@ -56,13 +56,10 @@ def register_callbacks(app):
         except Exception:
             return no_update, no_update
 
-    # ── Compose send / draft ─────────────────────────────────────────
+    # ── Compose send / draft — direct API call, no agent polling ────
     @app.callback(
         Output("chat-messages",   "children",  allow_duplicate=True),
         Output("messages-store",  "data",      allow_duplicate=True),
-        Output("pending-message", "data",      allow_duplicate=True),
-        Output("agent-poll",      "disabled",  allow_duplicate=True),
-        Output("agent-poll",      "n_intervals", allow_duplicate=True),
         Output("status-dot",      "children",  allow_duplicate=True),
         Output("status-text",     "children",  allow_duplicate=True),
         Output("compose-modal",   "style",     allow_duplicate=True),
@@ -78,27 +75,42 @@ def register_callbacks(app):
     def handle_compose_action(send_clicks, draft_clicks, to, subject, body, messages, token):
         ctx = callback_context
         if not ctx.triggered:
-            return no_update, no_update, no_update, True, 0, no_update, no_update, no_update
+            return no_update, no_update, no_update, no_update, no_update
         trigger   = ctx.triggered[0]["prop_id"]
         clicked_v = ctx.triggered[0]["value"]
         if not clicked_v or not to or not subject or not body:
-            return no_update, no_update, no_update, True, 0, no_update, no_update, no_update
+            return no_update, no_update, no_update, no_update, no_update
 
         messages = messages or []
         is_send  = "compose-send-btn" in trigger
 
         if is_send:
-            message       = f"send an email to {to} with subject: {subject} and body: {body}"
-            thinking_msg  = "⏳ Waiting for Guardian approval on your phone..."
-            status        = "Awaiting Guardian..."
+            user_msg  = f"Send email to {to} — Subject: {subject}"
+            endpoint  = f"http://localhost:{PORT}/api/send-email"
+            status    = "Awaiting Guardian..."
+            dot       = "◌"
         else:
-            message       = f"draft an email to {to} with subject: {subject} and body: {body}"
-            thinking_msg  = "Thinking..."
-            status        = "Thinking..."
+            user_msg  = f"Draft email to {to} — Subject: {subject}"
+            endpoint  = f"http://localhost:{PORT}/api/draft-email"
+            status    = "Thinking..."
+            dot       = "◌"
 
-        messages.append({"role": "user", "content": message})
-        bubbles = [msg_bubble_from_store(m) for m in messages] + [thinking_bubble(thinking_msg)]
-        return bubbles, messages, message, False, 0, "◌", status, {"display": "none"}
+        messages.append({"role": "user", "content": user_msg})
+
+        try:
+            r = req.post(
+                endpoint,
+                json={"to": to, "subject": subject, "body": body},
+                headers={"X-Session-Token": token},
+                timeout=180,
+            )
+            reply = r.json().get("reply", r.json().get("error", "Something went wrong."))
+        except Exception as e:
+            reply = f"⚠️ Error: {e}"
+
+        messages.append({"role": "assistant", "content": reply})
+        bubbles = [msg_bubble_from_store(m) for m in messages]
+        return bubbles, messages, "●", "Ready", {"display": "none"}
 
     # ── Sidebar collapse ─────────────────────────────────────────────
     @app.callback(
